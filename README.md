@@ -209,4 +209,431 @@ There are some of the folders that probably by now if you have open the text edi
 #### sources 
 These is where we define and direct dbt to access our files and folders from in the datawarehouse
 ```
+version: 2
+
+sources:
+  - name: sales 
+    schema: Raw 
+    tables:
+      - name: orders
+        identifier: orders
+      - name: customers
+        identifier: customers
+      - name: products
+        identifier: products  
+      - name: web_logs
+        identifier: web_logs
+      - name: social_media
+        identifier: social_media
+      - name: reviews
+        identifier: reviews
+    ```
+```
+
+We will move to build the models in the bronze, silver and gold
+
+##### Bronze
+Custoners.sql
+```
+With raw_customers as (
+    select
+        *
+    from {{ source('sales', 'customers') }}
+)
+select
+    customerId,
+    customerName,
+    email,
+    location,
+    signupdate
+
+from raw_customers
+```
+ Orders.sql
+```
+With raw_orders as (
+    select
+        *
+    from {{ source('sales', 'orders') }}
+)
+select
+    orderId,
+    orderDate,
+    customerId,
+    productId,
+    quantity,
+    TotalAmount,
+    Paymentmethod
+from raw_orders
+```
+Products.sql
+
+```
+with raw_products as (
+    select
+        *
+    from {{ source('sales', 'products') }}
+)
+select 
+    productId,
+    productName,
+    Category,
+    Stock,
+    UnitPrice
+from raw_products
+```
+Reviews.sql
+```
+with raw_reviews as (
+    select
+        *
+    from {{ source('sales', 'reviews') }}
+)
+select
+    timestamp,
+    customer_ID,
+    product_ID,
+    rating,
+    review_text,
+from raw_reviews
+```
+Social_media.sql
+```
+with raw_social_media as (
+    select
+        *
+    from {{ source('sales', 'social_media') }}
+)
+
+select 
+timestamp,
+    platform,
+    content,
+    sentiment
+from raw_social_media
+```
+Weblogs.sql
+```
+with raw_weblogs as (
+    select
+        *
+    from {{ source('sales', 'web_logs') }}
+)
+
+select 
+    timestamp,
+    user_id,
+    page,
+    action
+from raw_weblogs
+```
+#### Silver
+
+dim_customers
+```
+{{ config(materialized='table') }}
+
+with dim_customers as (
+    select
+        cast(replace(customerId, 'CUST', '') as integer) as customer_id,
+        split_part(customerName, ' ', 1) as first_name,
+        split_part(customerName, ' ', 2) as last_name,
+        email as customer_email,
+        location,
+        cast(signupdate as date) as customer_signupdate
+    from {{ ref('customers') }}
+    where lower(customerId) not in ('customerid')
+      and customerId is not null
+)
+
+select * from dim_customers
+```
+dim_products
+```
+{{ config(materialized='table') }}
+
+with dim_products as (
+    select
+        cast(replace(productId, 'PROD', '') as integer) as product_id,
+        productName as product_name,
+        Category as product_category,
+        cast(Stock as integer) as product_stock,
+        cast(UnitPrice as float) as product_price
+    from {{ ref('products') }}
+    where productId is not null
+)
+
+select * from dim_products
+```
+dim_orders
+```
+{{ config(materialized='table') }}
+with dim_orders as (
+    select
+        cast(replace(orderId, 'ORD', '') as integer) as order_id,
+        cast(replace(customerId, 'CUST', '') as integer) as customer_id,
+        cast(replace(productId, 'PROD', '') as integer) as product_id,
+        cast(orderDate as date) as order_date,
+        cast(date_trunc('hour', cast(orderDate as timestamp)) as time) as order_hour,
+        quantity,
+        cast(totalAmount as float) as total_amount,
+        paymentMethod as payment_method
+    from {{ ref('orders') }}
+    where orderId is not null
+)
+select * from dim_orders
+```
+dim_dates
+```
+with dim_tables as (
+    select
+        {{ dbt_utils.generate_surrogate_key(['orderID', 'orderDate']) }} as date_id,
+        cast(orderDate as date) as order_date,
+        
+        extract(year from cast(orderDate as date)) as order_year,
+        extract(month from cast(orderDate as date)) as order_month,
+        extract(day from cast(orderDate as date)) as order_day,
+        dayname(cast(orderDate as date)) as day_of_week,
+        lpad(cast(extract(hour from cast(orderDate as timestamp)) as string), 2, '0') || ':00 hrs' as order_hour
+    from {{ ref('orders') }}
+)
+
+select * from dim_tables
+
+```
+dim_reviews
+```
+{{ config(materialized='table') }}
+
+with dim_reviews as (
+    select
+        {{ dbt_utils.generate_surrogate_key(['timestamp', 'customer_ID', 'product_ID']) }} as review_id,
+        cast(replace(customer_ID, 'CUST', '') as integer) as customer_id,
+        cast(replace(product_ID, 'PROD', '') as integer) as product_id,
+        cast(timestamp as date) as review_date,
+        cast(date_trunc('hour', cast(timestamp as timestamp)) as time) as review_hour,
+        cast(rating as integer) as rating,
+        cast(review_text as text) as review_text,
+        cast(current_timestamp() as timestamp) as updated_at
+    from {{ ref('reviews') }}
+    where customer_ID is not null
+)
+
+select * from dim_reviews
+```
+dim_socialmedia
+```
+{{ config(materialized='table') }}
+
+with dim_socialmedia as (
+    select  
+        {{ dbt_utils.generate_surrogate_key(['timestamp', 'platform', 'content']) }} as post_id,
+        
+         cast(timestamp as date) as post_date, 
+        cast(date_trunc('hour', cast(timestamp as timestamp)) as time) as post_hour,
+        cast(platform as text) as platform,
+        cast(content as text) as content,
+        cast(sentiment as text) as sentiment,
+        
+    from {{ ref('social_media') }}
+    where timestamp is not null
+      and lower(platform) not in ('platform')  -- remove accidental header row
+)
+
+select * from dim_socialmedia
+```
+dim_weblogs
+```
+{{ config(materialized='table') }}
+
+with dim_weblogs as (
+    select
+        {{ dbt_utils.generate_surrogate_key(['timestamp', 'user_id', 'page', 'action']) }} as activity_id,
+        cast(replace(user_id, 'CUST', '') as integer) as customer_id,
+        cast(timestamp as date) as activity_date,
+        cast(date_trunc('hour', cast(timestamp as timestamp)) as time) as activity_hour,
+        cast(page as text) as page,
+        cast(action as text) as action_taken
+    from {{ ref('web_logs') }}
+    where timestamp is not null
+      and lower(user_id) not in ('user_id')
+)
+
+select * from dim_weblogs
+```
+dim_sales
+```
+{{ config(materialized='table') }}
+
+with orders as (
+    select
+        order_id,
+        customer_id,
+        product_id,
+        order_date,
+        order_hour,
+        quantity,
+        total_amount,
+        payment_method
+    from {{ ref('dim_orders') }}
+),
+
+customers as (
+    select
+        customer_id,
+        customer_signupdate
+    from {{ ref('dim_customers') }}
+),
+
+products as (
+    select
+        product_id,
+        product_price
+    from {{ ref('dim_products') }}
+),
+
+reviews as (
+    select
+        review_id,
+        customer_id,
+        product_id,
+        review_date
+    from {{ ref('dim_reviews') }}
+),
+
+weblogs_agg as (
+    select
+        customer_id,
+        activity_id,
+        activity_date
+    from {{ ref('dim_weblogs') }}
+    qualify row_number() over (partition by customer_id order by activity_date) = 1 -- First record per customer
+),
+
+dim_dates as (
+    select
+        date_id,
+        order_date
+    from {{ ref('dim_date') }}
+)
+
+select
+    -- Unique sales ID
+    {{ dbt_utils.generate_surrogate_key(['o.order_id', 'o.product_id', 'o.customer_id']) }} as sales_id,
+
+    -- Foreign keys
+    o.order_id,
+    o.customer_id,
+    o.product_id,
+    r.review_id,
+    d.date_id,
+    w.activity_id,
+
+    -- Measures
+    o.quantity,
+    o.total_amount,
+    p.product_price,
+
+    -- Dates
+    o.order_date,
+    o.order_hour,
+    r.review_date,
+    w.activity_date as first_web_activity_date,
+
+    -- Payment
+    o.payment_method,
+
+    -- Behavioral logic
+    case
+        when c.customer_signupdate <= o.order_date then true
+        else false
+    end as signup_before_order,
+
+    -- Time gaps
+    datediff('day', o.order_date, r.review_date) as order_to_review_gap_days,
+    datediff('day', w.activity_date, o.order_date) as activity_to_order_gap_days -- Added simple calculation
+
+from orders o
+left join customers c on o.customer_id = c.customer_id
+left join products p on o.product_id = p.product_id
+left join reviews r
+    on o.customer_id = r.customer_id
+    and o.product_id = r.product_id
+left join weblogs_agg w
+    on o.customer_id = w.customer_id
+left join dim_dates d on o.order_date = d.order_date
+where o.order_id is not null
+```
+
+#### Gold
+ customers_table
+```
+{{ config(materialized='table') }}
+
+with customers_table as (
+    select  
+         customer_id,
+        first_name,
+        last_name,
+        customer_email,
+        location,
+        customer_signupdate
+        
+    from {{ ref('dim_customers') }}
+     
+)
+
+select *
+from customers_table
+where customer_id is not null
+```
+products_table
+```
+{{ config(materialized='table') }}
+
+with product_table as (
+    select * from {{ ref('dim_products') }}
+)
+
+select  
+     product_id,
+    product_name,
+     product_category,
+    product_stock
+ 
+    
+from product_table
+where product_Id is not null
+```
+Orders_table
+```
+{{ config(materialized='table') }}
+
+with orders_table as (
+    select  
+        order_id,
+        payment_method
+        from {{ ref('dim_orders') }}
+)
+
+select * from orders_table
+where order_id is not null
+```
+Reviews_table
+```
+{{ config(materialized='table') }}
+
+with reviews_table as (
+    select
+         review_id,
+        review_date,
+        rating,
+        review_text
+    
+    from {{ ref('dim_reviews') }}
+    where review_id is not null
+)
+
+select * from reviews_table
+```
 
