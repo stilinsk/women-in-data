@@ -5,6 +5,13 @@ DBT otherwise known as data build tool is a tool we use in the modern data stack
 <img width="1206" height="1132" alt="Untitled Diagram drawio" src="https://github.com/user-attachments/assets/2d0279f7-7e1c-4d7c-af1e-eb64ad801436" />
 
 
+
+
+In the fact table we have normalization ---3nf
+
+<img width="1201" height="777" alt="Untitled Diagram drawio" src="https://github.com/user-attachments/assets/fa35978d-0126-4a07-b0fc-2c74bd1694e1" />
+  we will be using the second one as it follows the principles of the medalion architechture
+
  This will be the semantic model that will be exposed to the Gold layer for the data analysts .
 
 
@@ -24,7 +31,7 @@ We will start by creating a snowflake account ,snowflake provides a 30 daya free
  We will start by creating our logins and then we creat tables for us to load data in them ( the csv tables will be provided )
 
  ```
-SALES.RAW.ORDERS-- Use admin role
+ -- Use admin role
 USE ROLE ACCOUNTADMIN;
 
 -- Create the `data` role
@@ -328,6 +335,14 @@ select
 from raw_weblogs
 ```
 #### Silver
+
+ADD DBT PACKAGES.YML
+```
+packages:
+  - package: dbt-labs/dbt_utils
+    version: 1.3.0
+```
+ run using dbt deps
 
 dim_customers
 ```
@@ -636,4 +651,373 @@ with reviews_table as (
 
 select * from reviews_table
 ```
+date table
+```
+With date_table as (
+    select
+        *
+    from {{ ref('dim_dates') }}
+)
+select
+*
 
+from date_table
+```
+
+add schema.yml
+```
+version: 2
+models:
+- name: customers
+  description: Staging model containing customer information including demographics and sign-up details.
+  columns:
+  - name: customerId
+    description: Unique identifier for each customer.
+  - name: customerName
+    description: Full name of the customer.
+  - name: email
+    description: Email address of the customer.
+  - name: location
+    description: Geographic location of the customer.
+  - name: signupdate
+    description: Date when the customer signed up.
+- name: orders
+  description: Staging model containing all customer orders placed on the platform.
+  columns:
+  - name: orderId
+    description: Unique identifier for each order.
+  - name: orderDate
+    description: Date when the order was placed.
+  - name: customerId
+    description: Customer who placed the order.
+  - name: productId
+    description: Product that was ordered.
+  - name: quantity
+    description: Quantity of product ordered.
+  - name: Totalamount
+    description: Total monetary value of the order.
+  - name: Paymentmethod
+    description: Payment method used (e.g., Credit Card, PayPal).
+- name: products
+  description: Staging model with product catalog and inventory information.
+  columns:
+  - name: productId
+    description: Unique identifier for each product.
+  - name: productName
+    description: Name of the product.
+  - name: Category
+    description: Category or classification of the product.
+  - name: Stock
+    description: Number of units currently in stock.
+  - name: UnitPrice
+    description: Price per unit of the product.
+- name: reviews
+  description: Staging model containing customer reviews for products.
+  columns:
+  - name: timestamp
+    description: Date and time when the review was posted.
+  - name: customer_ID
+    description: Customer who wrote the review.
+  - name: product_ID
+    description: Product being reviewed.
+  - name: rating
+    description: Star rating given by the customer (e.g., 1 to 5).
+  - name: review_text
+    description: "Text content of the customer\xE2\u20AC\u2122s review."
+- name: social_media
+  description: Staging model of social media posts and associated sentiment.
+  columns:
+  - name: timestamp
+    description: Date and time of the post.
+  - name: platform
+    description: Platform where the post was made (e.g., Twitter, Instagram).
+  - name: content
+    description: Content of the post.
+  - name: sentiment
+    description: Sentiment classification of the post (e.g., positive, negative, neutral).
+- name: web_logs
+  description: Staging model of website interaction logs.
+  columns:
+  - name: timestamp
+    description: Date and time of the interaction.
+  - name: user_id
+    description: User who visited the site.
+  - name: page
+    description: Web page visited.
+  - name: action
+    description: Type of action performed (e.g., click, view, add_to_cart).
+```
+
+CREATE FROLDER SCRIPTS /agent.py
+
+```
+import openai
+import yaml
+import os
+from pathlib import Path
+from typing import Dict, List, Optional, Tuple
+import re
+import sqlparse
+from sqlparse.sql import Identifier, Function, Comparison
+from dotenv import load_dotenv
+import sys
+
+env_path = Path(__file__).parent / ".env"
+load_dotenv(dotenv_path=env_path)
+
+class DBTDocumentationAppender:
+    def __init__(self, openai_api_key: str, dbt_project_path: str):
+        self.client = openai.OpenAI(api_key=openai_api_key)
+        self.dbt_path = Path(dbt_project_path)
+        self.schema_path = self.dbt_path / "models" / "schema.yml"
+        self.live_output = True  # Initialize before _load_schema_file
+        self.schema = self._load_schema_file()
+        self.bronze_schema = self.schema
+    
+    def _print_live(self, message: str) -> None:
+        """Print message immediately with flush"""
+        if self.live_output:
+            print(message)
+            sys.stdout.flush()
+    
+    def _load_schema_file(self) -> Dict:
+        """Load the existing schema.yml file and return its content"""
+        try:
+            with open(self.schema_path) as f:
+                schema = yaml.safe_load(f) or {}
+                if "models" not in schema:
+                    schema["models"] = []
+                self._print_live(f"\n📂 Loaded existing schema with {len(schema.get('models', []))} models")
+                return schema
+        except FileNotFoundError:
+            self._print_live("\n📂 No existing schema.yml found, starting fresh")
+            return {"models": []}
+    
+    def _get_model_sql(self, layer: str, model_name: str) -> Optional[str]:
+        """Get SQL content for a model"""
+        sql_path = self.dbt_path / "models" / layer / f"{model_name}.sql"
+        try:
+            with open(sql_path) as f:
+                self._print_live(f"\n🔍 Found SQL file for {model_name} in {layer} layer")
+                return f.read()
+        except FileNotFoundError:
+            self._print_live(f"\n⚠️ SQL file not found for {model_name} in {layer} layer")
+            return None
+    
+    def append_documentation(self) -> None:
+        """Analyze SQL models and append documentation to the existing schema.yml"""
+        updated_schema = self.schema.copy()
+        existing_models = {m["name"] for m in updated_schema.get("models", []) if "name" in m}
+        
+        for layer in ["silver", "gold"]:
+            layer_path = self.dbt_path / "models" / layer
+            if not layer_path.exists():
+                self._print_live(f"\n⏩ Skipping {layer} layer - directory not found")
+                continue
+                
+            self._print_live(f"\n🔎 Scanning {layer} layer for models...")
+            
+            for sql_file in layer_path.glob("*.sql"):
+                model_name = sql_file.stem
+                self._print_live(f"\n📋 Processing model: {model_name}")
+                
+                if model_name in existing_models:
+                    self._print_live(f"⏩ Model {model_name} already documented - skipping")
+                    continue
+                
+                sql_content = self._get_model_sql(layer, model_name)
+                if not sql_content:
+                    continue
+                
+                self._print_live("🔧 Analyzing transformations...")
+                transformations = self._analyze_transformations(sql_content)
+                
+                if transformations:
+                    self._print_live("🔄 Found transformations:")
+                    for col, trans in transformations.items():
+                        self._print_live(f"   - {col}: {trans}")
+                
+                self._print_live("🤖 Generating documentation with AI...")
+                model_doc = self._generate_model_documentation(
+                    model_name, layer, sql_content, transformations
+                )
+                
+                if model_doc:
+                    self._print_live("📝 Generated documentation:")
+                    self._print_live(yaml.dump([model_doc], sort_keys=False, width=120))
+                    updated_schema["models"].append(model_doc)
+                    self._print_live(f"✅ Added documentation for {model_name}")
+                else:
+                    self._print_live(f"⚠️ Failed to generate documentation for {model_name}")
+        
+        self._save_schema_yml(updated_schema)
+    
+    def _analyze_transformations(self, sql: str) -> Dict[str, str]:
+        """Analyze SQL to identify column transformations"""
+        transformations = {}
+        parsed = sqlparse.parse(sql)
+        if not parsed:
+            return transformations
+        
+        stmt = parsed[0]
+        from_seen = False
+        
+        for token in stmt.tokens:
+            if from_seen:
+                break
+            if token.match(sqlparse.tokens.Keyword, 'FROM'):
+                from_seen = True
+                continue
+            if isinstance(token, sqlparse.sql.IdentifierList):
+                for identifier in token.get_identifiers():
+                    col_name, transform = self._parse_column_expression(identifier)
+                    if col_name and transform:
+                        transformations[col_name] = transform
+        return transformations
+    
+    def _parse_column_expression(self, identifier) -> Tuple[Optional[str], Optional[str]]:
+        """Parse a column expression to identify transformations"""
+        if not isinstance(identifier, Identifier):
+            return None, None
+        
+        col_name = identifier.get_alias() or identifier.get_real_name()
+        if not col_name:
+            return None, None
+        
+        if any(isinstance(t, Function) for t in identifier.tokens):
+            func = next(t for t in identifier.tokens if isinstance(t, Function))
+            return col_name, f"Transformed using {func.get_real_name()} function"
+        
+        if any(t.match(sqlparse.tokens.Keyword, 'CASE') for t in identifier.tokens):
+            return col_name, "Conditional transformation using CASE"
+        
+        if any(isinstance(t, Comparison) for t in identifier.tokens):
+            return col_name, "Comparison operation applied"
+        
+        if '::' in identifier.value:
+            return col_name, f"Type cast to {identifier.value.split('::')[1].strip()}"
+        
+        return col_name, "Direct column reference"
+    
+    def _generate_model_documentation(self, model_name: str, layer: str, 
+                                   sql_content: str, transformations: Dict[str, str]) -> Optional[Dict]:
+        """Generate documentation with transformation context"""
+        prompt = self._create_documentation_prompt(
+            model_name, layer, sql_content, transformations
+        )
+        response = self._get_ai_response(prompt)
+        return self._parse_ai_response(response)
+    
+    def _create_documentation_prompt(self, model_name: str, layer: str, 
+                                   sql: str, transformations: Dict[str, str]) -> str:
+        """Create the AI prompt for documentation generation"""
+        transform_context = "\n".join(
+            f"- {col}: {desc}" for col, desc in transformations.items()
+        )
+        
+        return f"""
+        As a dbt documentation expert, generate YAML documentation for model '{model_name}' in the {layer} layer.
+        Use this bronze layer documentation as reference: {self.bronze_schema}
+        
+        Model SQL:
+        {sql}
+        
+        Column Transformations Identified:
+        {transform_context}
+        
+        Rules:
+        1. ONLY document columns present in the SQL
+        2. Include transformation details in column descriptions
+        3. Use ONLY standard dbt tests (e.g., unique, not_null, relationships)
+        4. Keep business context clear
+        5. Do NOT include Great Expectations tests or custom tests like foreign_key
+        
+        Required YAML format (model section only, no 'version' or 'models' keys):
+        - name: {model_name}
+          description: |
+            [1-2 sentence model purpose]
+          columns:
+            - name: column_name
+              description: |
+                [Business meaning]
+                Transformation: [specific changes from source]
+              tests:
+                - [standard_dbt_test_like_unique_or_not_null]
+        
+        Generate comprehensive documentation:
+        """
+    
+    def _get_ai_response(self, prompt: str) -> str:
+        """Get response from OpenAI API"""
+        try:
+            self._print_live("\n💭 Sending prompt to AI...")
+            response = self.client.chat.completions.create(
+                model="gpt-4-turbo",
+                messages=[{"role": "user", "content": prompt}],
+                temperature=0.3
+            )
+            self._print_live("🎯 Received AI response")
+            return response.choices[0].message.content
+        except Exception as e:
+            self._print_live(f"⚠️ Error getting AI response: {e}")
+            return ""
+    
+    def _parse_ai_response(self, response_text: str) -> Dict:
+        """Parse AI response into YAML"""
+        try:
+            if "```yaml" in response_text:
+                response_text = response_text.split("```yaml")[1].split("```")[0]
+            parsed = yaml.safe_load(response_text)
+            if isinstance(parsed, list):
+                return parsed[0] if parsed else {}
+            return parsed
+        except yaml.YAMLError as e:
+            self._print_live(f"⚠️ Failed to parse AI response: {e}")
+            return {}
+    
+    def _save_schema_yml(self, content: Dict) -> None:
+        """Save schema.yml preserving existing content and structure"""
+        if "version" not in content and "version" in self.schema:
+            content["version"] = self.schema["version"]
+        
+        self.schema_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        class OrderedDumper(yaml.SafeDumper):
+            pass
+        
+        def dict_representer(dumper, data):
+            return dumper.represent_mapping(
+                yaml.resolver.BaseResolver.DEFAULT_MAPPING_TAG,
+                data.items(),
+                flow_style=False
+            )
+        
+        OrderedDumper.add_representer(dict, dict_representer)
+        
+        self._print_live("\n💾 Saving schema.yml with updates...")
+        with open(self.schema_path, "w") as f:
+            yaml.dump(content, f, Dumper=OrderedDumper, sort_keys=False, width=120)
+        
+        self._print_live(f"\n✅ Successfully updated {self.schema_path}")
+        self._print_live("🔍 Final schema content preview:")
+        self._print_live("---")
+        with open(self.schema_path) as f:
+            for i, line in enumerate(f):
+                if i < 20:  # Show first 20 lines
+                    self._print_live(line.rstrip())
+                else:
+                    self._print_live("... (truncated)")
+                    break
+        self._print_live("---")
+
+if __name__ == "__main__":
+    appender = DBTDocumentationAppender(
+        openai_api_key=os.getenv("OPENAI_API_KEY"),
+        dbt_project_path=r"C:\Users\kaman\Documents\wid\dbtlearn"
+    )
+    appender.append_documentation()
+```
+INTSTAKLL THE FOLLOWING
+```
+pip install openai pyyaml sqlparse python-dotenv
+```
