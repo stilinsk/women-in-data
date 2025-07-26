@@ -1,0 +1,51 @@
+ProductID,ProductName,Category,Stock,UnitPrice
+PROD200,Suit,Fashion,83,979.95
+PROD201,Ball,Sports,325,218.04
+PROD202,Jeans,Fashion,314,354.52
+PROD203,Computer,Electronics,486,608.34
+PROD204,DiningTable,Home Goods,236,900.27
+PROD205,Tshirt,Fashion,164,47.19
+PROD206,Chair,Home Goods,367,194.85
+PROD207,DesignerBag,Fashion,261,398.82
+PROD208,Sofa,Home Goods,297,643.2
+PROD209,Socks,Sports,142,25.57
+PROD210,Bed,Home Goods,351,810.63
+PROD211,Shoes,Fashion,478,49.04
+PROD212,GolfKit,Sports,140,835.29
+PROD213,Ring,Fashion,356,597.96
+PROD214,Watch,Electronics,471,186.96
+PROD215,MakeupKit,Fashion,186,517.38
+PROD216,SkiSuit,Sports,240,295.03
+PROD217,Necklace,Fashion,490,459.04
+PROD218,SwimSuit,Sports,120,73.25
+PROD219,Chair,Home Goods,194,342.35
+PROD220,HikingKit,Sports,272,448.13
+PROD221,Ipad,Electronics,294,675.37
+PROD222,NikeShoes,Sports,33,190.59
+PROD223,Bike,Sports,355,598.09
+PROD224,Kettle,Electronics,202,568.24
+PROD225,LaptopLenova,Electronics,199,808.88
+PROD226,Speaker,Electronics,345,216.05
+PROD227,Baseball,Sports,241,313.75
+PROD228,Window Coverings,Home Goods,21,513.36
+PROD229,GameJersey,Sports,80,307.9
+PROD230,Sunglasses,Fashion,319,587.25
+PROD231,Storage Bins,Home Goods,310,267.06
+PROD232,LightFixture,Home Goods,131,289.76
+PROD233,Carpet,Home Goods,208,950.54
+PROD234,Dinner,Electronics,406,931.09
+PROD235,Bedsheet,Home Goods,427,171.5
+PROD236,16carat Gold ring,Fashion,461,745.26
+PROD237,FitnessWatchBlack,Electronics,120,224.53
+PROD238,BookCase,Home Goods,443,778.13
+PROD239,Camera,Electronics,467,366.52
+PROD240,BabyStroller,Fashion,269,515.16
+PROD241,TreadMill,Electronics,182,786.72
+PROD242,GoKart,Sports,108,485.7
+PROD243,Monitor,Electronics,256,557.19
+PROD244,Trousers,Fashion,151,285.87
+PROD245,LawnMower,Home Goods,203,748.84
+PROD246,SkiBoots,Sports,244,703.13
+PROD247,Mattress,Home Goods,425,716.17
+PROD248,BallPit,Sports,382,122.29
+PROD249,CoffeeTable,Home Goods,120,418.67

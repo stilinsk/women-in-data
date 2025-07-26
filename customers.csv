@@ -1,0 +1,101 @@
+CustomerID,CustomerName,Email,Location,SignupDate
+CUST100,Barbara Flynn,jlutz@yahoo.com,Sharonhaven,2023-01-10
+CUST101,Susan Diaz,bmueller@roberts.com,Port Ericmouth,2023-09-14
+CUST102,Terry Green,blakethompson@price-young.com,East Shawn,2024-09-20
+CUST103,Kimberly Garza,julie20@yahoo.com,North Williamtown,2022-12-02
+CUST104,David Turner,rangelshannon@hotmail.com,South Staceymouth,2023-05-07
+CUST105,Nicole Ramirez,james53@adams.info,Joshuamouth,2022-06-04
+CUST106,Patrick Kelley,qwilliams@aguilar.com,Lake Amandaview,2024-07-15
+CUST107,Robin Barnes,ureese@white-montgomery.com,Rogerfurt,2022-09-03
+CUST108,Robin Beck,lori26@hotmail.com,Royland,2024-01-27
+CUST109,Yolanda Smith,gramirez@yahoo.com,Villarrealchester,2022-10-24
+CUST110,Reginald Ewing,aaron47@yahoo.com,Lake Josetown,2024-04-14
+CUST111,Daniel Fernandez,jrobinson@potter.net,Nealberg,2022-11-26
+CUST112,Isabella Mccall,davischristopher@perkins.info,East Michelle,2025-02-08
+CUST113,Shawn Goodman,barnesholly@brown.com,North Taylor,2024-12-23
+CUST114,Kristina Singleton,ksmith@yahoo.com,Port Cristianborough,2024-06-15
+CUST115,Heather Day,melissa63@alexander.org,West Sara,2024-10-25
+CUST116,Melinda Gibbs,ashleybrianna@ramirez.org,Saraport,2024-11-01
+CUST117,Amanda Parker,michael56@hotmail.com,North Derek,2024-10-17
+CUST118,Hannah Weber,tamara22@mahoney.com,Brandonhaven,2022-12-03
+CUST119,Katie Wilkerson,jongallagher@jordan.com,Port Bradleybury,2022-08-23
+CUST120,Shannon Greene,fcarpenter@hotmail.com,Port Thomas,2023-08-30
+CUST121,Tanya Nelson,higginsanthony@carter.com,East Robert,2023-09-17
+CUST122,Michael Kaiser,melissameyer@gmail.com,Kimtown,2025-03-05
+CUST123,Erin Leonard,sallycervantes@mccoy-ingram.com,Johnsonstad,2024-06-14
+CUST124,Michael Taylor,mollycochran@yahoo.com,Lake Gary,2024-07-19
+CUST125,Lori Watson,kristina51@yahoo.com,New Kellyberg,2024-02-11
+CUST126,Dr. Krista Lewis DDS,ywright@gmail.com,West Brittanybury,2024-07-20
+CUST127,Marissa Morgan,vtanner@williams.biz,New Michaelfort,2025-04-21
+CUST128,Meagan Padilla,jamesduncan@gmail.com,Port Justinport,2022-10-15
+CUST129,Alexander Torres,dorozco@hudson.com,North Wayneview,2022-08-28
+CUST130,Jesus Gordon,sglover@bell.org,Ericaborough,2023-09-18
+CUST131,Timothy Wheeler,cherman@riley.com,North Carlaton,2023-03-29
+CUST132,James Dodson,hollysandoval@garner.info,Christophertown,2023-12-07
+CUST133,David Smith,loganhensley@mckinney.com,East Sabrina,2023-09-23
+CUST134,Emily Weber,gmartin@gmail.com,West Anita,2023-07-26
+CUST135,Travis Ritter,parrishjennifer@oliver-williams.net,Perkinsfort,2024-10-01
+CUST136,Laura Johnson,ydouglas@gmail.com,Kylestad,2024-05-05
+CUST137,Bradley Norton,deborahbraun@anderson.com,Port Anne,2023-03-16
+CUST138,Karen Hudson,villavictoria@yahoo.com,New Kimberly,2024-03-06
+CUST139,Jason Woodard,schmidtdebbie@lawrence.biz,New Rodneyfort,2022-07-30
+CUST140,Molly Sandoval,martinezjohn@welch.net,North Emily,2024-10-18
+CUST141,Kevin Phillips MD,chelsea94@oconnor-mueller.com,Morenoshire,2023-04-28
+CUST142,Scott Warren,david30@garcia.com,West Sarah,2023-10-18
+CUST143,Natalie Doyle,jessica90@hotmail.com,New Thomastown,2024-10-20
+CUST144,Lee Acosta,faguirre@gmail.com,Vasquezside,2023-09-08
+CUST145,Morgan Rodriguez,martinstacy@conner-armstrong.com,West Samanthaburgh,2023-06-26
+CUST146,Mr. Joshua Owens,kaitlynpotter@yahoo.com,West Michelebury,2023-02-04
+CUST147,Michael Long,qcline@gmail.com,Lake Michael,2023-07-13
+CUST148,Matthew Ramirez,elliottjeffrey@yahoo.com,Andersontown,2024-09-03
+CUST149,Ruben Gay,nscott@yahoo.com,Lake Natashahaven,2024-01-30
+CUST150,Cheyenne Bell,joejames@thompson.com,East Kimberlyburgh,2023-03-20
+CUST151,Kimberly Figueroa,michael85@cox-sims.biz,Donaldfurt,2022-09-30
+CUST152,Lisa Taylor,carrillodenise@singleton.info,North Ricky,2022-06-16
+CUST153,Susan Martinez,ferrellsamuel@gmail.com,Whitneychester,2025-02-26
+CUST154,Christopher Taylor,christopher55@hernandez.com,Phyllisfort,2023-04-01
+CUST155,David Brown,nwright@huerta-snyder.info,Aaronberg,2023-05-08
+CUST156,Misty Santos,uedwards@russell.net,Mcfarlandburgh,2023-06-06
+CUST157,Tammy Smith,elizabethallen@yahoo.com,Davidtown,2025-05-10
+CUST158,Elizabeth White,kevin56@yahoo.com,Kennethshire,2025-04-19
+CUST159,Kim Gibson,jasonrodgers@schaefer-kelley.com,Haleybury,2022-07-09
+CUST160,Bryan Cohen,fraziersamuel@hotmail.com,East Amberstad,2023-03-26
+CUST161,Theresa Collier,angela61@yahoo.com,Nicolestad,2023-07-11
+CUST162,Rebecca Edwards,grossjulie@yahoo.com,West Alexisland,2022-08-02
+CUST163,Kelsey Solomon,tanyadavis@williams.com,Corteztown,2023-03-10
+CUST164,Brittany Daniels,basskeith@smith.com,Adamfort,2024-12-09
+CUST165,Franklin Crawford,kristen96@gmail.com,Davidfurt,2024-03-24
+CUST166,Lisa Sanchez,robinbaker@thomas.org,North Stephen,2023-05-07
+CUST167,Latoya White,amy39@fry-nguyen.org,South Russell,2023-07-24
+CUST168,Linda Massey,simssandra@gmail.com,Samanthaville,2024-10-19
+CUST169,Cynthia Lawson,michellegarcia@hotmail.com,South Kathleen,2024-03-12
+CUST170,Robin Duran,wbond@olson.net,Smithburgh,2023-01-07
+CUST171,Zachary Banks,qquinn@holt.info,Rebeccaburgh,2023-02-18
+CUST172,Latoya Hill,lindseykim@collins.com,New Ebonystad,2022-07-31
+CUST173,Reginald Vasquez,harrisbrandon@yahoo.com,East Lindafurt,2024-01-20
+CUST174,Pamela Hill,melissalong@fuller-rubio.com,Matabury,2025-05-04
+CUST175,Lisa Wright,mooredawn@ortiz.com,East Andreaview,2022-07-30
+CUST176,Anthony Johnson,michaelcross@gamble.com,West Brettport,2022-10-04
+CUST177,Jessica Pope,adamreed@graham.com,Deckerfurt,2023-06-26
+CUST178,Amy Mason,kelly39@hotmail.com,Garciaberg,2024-03-15
+CUST179,Jeremy Hernandez,jasmine07@gallegos.com,Huffmanmouth,2025-01-28
+CUST180,Victoria Daugherty,annamartinez@yahoo.com,Carterfort,2023-09-21
+CUST181,Stephanie Simpson,forbesrachel@gmail.com,North Joe,2024-01-23
+CUST182,Tyler Barrett,jacksonzachary@sanchez.com,Gregoryfurt,2024-07-04
+CUST183,Cindy Hensley,morganbarry@moore.com,North Jessica,2024-01-24
+CUST184,Cheryl Arellano,crawfordkatrina@clark-wheeler.com,New Brandonhaven,2022-06-12
+CUST185,Donna Mcintosh,tyler11@hotmail.com,New Kimberly,2024-07-15
+CUST186,Thomas Gray,ethan99@yahoo.com,New April,2025-02-12
+CUST187,Steven Brown,maddenevelyn@gmail.com,South Frank,2025-01-03
+CUST188,Elizabeth Alvarez,smithbenjamin@yahoo.com,Timothyton,2023-07-01
+CUST189,Robert Strickland,cordovajames@pugh.org,Boonehaven,2024-06-29
+CUST190,Suzanne Barnett,guerraphillip@harris.com,Priceview,2024-03-23
+CUST191,Marissa Barnett,monique24@jacobs-li.com,Prestonshire,2023-06-19
+CUST192,Jennifer Garcia,josephcannon@yahoo.com,North Sarahaven,2024-03-23
+CUST193,Matthew Davis,kelly86@payne.biz,Port Cindy,2022-11-16
+CUST194,Brian King,jacquelinewilliams@anderson.com,Rachelton,2025-03-28
+CUST195,Scott Lopez,uglover@hotmail.com,Edwardsbury,2024-08-28
+CUST196,Kelly Freeman,karentorres@gmail.com,New Loriberg,2023-05-21
+CUST197,Dustin Gill,mgilmore@frost-johnson.com,Hornchester,2022-09-24
+CUST198,Yvonne Davis,williamsgeorge@cole-aguirre.com,North Taylorbury,2024-11-03
+CUST199,Anita Ruiz,lawrencekim@parker.com,Tylermouth,2023-09-22
